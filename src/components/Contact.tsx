@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import React, { useRef } from 'react';
+import emailjs from '@emailjs/browser';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -6,31 +7,33 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import { toast } from 'sonner';
-import emailjs from '@emailjs/browser';
 
 const Contact = () => {
-  const formRef = useRef<HTMLFormElement>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const form = useRef<HTMLFormElement>(null);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const sendEmail = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+    if (!form.current) return;
     emailjs
-      .sendForm('service_fzfslrp', 'template_6p6etsh', formRef.current!, 'Ov7VM2I-bez5__fLb')
+      .sendForm(
+        'service_fzfslrp', // Replace with your EmailJS service ID
+        'template_6p6etsh', // Replace with your EmailJS template ID
+        form.current,
+        'Ov7VM2I-bez5__fLb' // Replace with your EmailJS public key
+      )
       .then(
         (result) => {
           toast.success("Thanks for reaching out! I'll get back to you soon!");
-          formRef.current?.reset();
+          form.current?.reset();
         },
         (error) => {
-          toast.error('Failed to send message. Please try again later.');
-          console.error('Email sending failed:', error);
+          toast.error('Failed to send message. Please try again or contact me directly.');
+          console.error('Failed to send email:', error);
         }
       )
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+      .finally(() => setIsSubmitting(false));
   };
 
   const contactInfo = [
@@ -38,20 +41,20 @@ const Contact = () => {
       icon: Mail,
       label: 'Email',
       value: 'kebedeadugna45@gmail.com',
-      href: 'mailto:kebedeadugna45@gmail.com',
+      href: 'mailto:kebedeadugna45@gmail.com'
     },
     {
       icon: Phone,
       label: 'Phone',
       value: '+251 973 309 749',
-      href: 'tel:+251973309749',
+      href: 'tel:+251973309749'
     },
     {
       icon: MapPin,
       label: 'Location',
       value: 'Addis Ababa, Ethiopia',
-      href: '#',
-    },
+      href: '#'
+    }
   ];
 
   return (
@@ -62,6 +65,14 @@ const Contact = () => {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Have a project in mind or want to collaborate? I'd love to hear from you!
           </p>
+        </div>
+
+        <div className="flex justify-center mb-8">
+          <a href="/resume.pdf" download>
+            <Button size="lg" className="flex items-center gap-2">
+              Download Resume
+            </Button>
+          </a>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
@@ -106,12 +117,12 @@ const Contact = () => {
               <CardTitle className="text-2xl">Send Message</CardTitle>
             </CardHeader>
             <CardContent>
-              <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+              <form ref={form} onSubmit={sendEmail} className="space-y-6">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="user_name">Full Name *</Label>
+                    <Label htmlFor="name">Full Name *</Label>
                     <Input
-                      id="user_name"
+                      id="name"
                       name="user_name"
                       type="text"
                       required
@@ -119,9 +130,9 @@ const Contact = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="user_email">Email *</Label>
+                    <Label htmlFor="email">Email *</Label>
                     <Input
-                      id="user_email"
+                      id="email"
                       name="user_email"
                       type="email"
                       required
